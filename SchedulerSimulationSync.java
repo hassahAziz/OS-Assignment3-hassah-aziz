@@ -39,6 +39,8 @@ class SharedResources {
 
     // TODO #1: Add a ReentrantLock(s) here to protect critical sections
     // Example: public static final ReentrantLock lock = new ReentrantLock();
+    // Lock used to protect the shared execution log
+    public static final ReentrantLock logLock = new ReentrantLock();// Commit 3
 
     // Lock used to protect shared counter variables
     public static final ReentrantLock counterLock = new ReentrantLock();// Commit 1
@@ -91,7 +93,15 @@ class SharedResources {
     public static void logExecution(String message) {
         // TODO: Protect this critical section with a lock
         // RACE CONDITION: ArrayList is not thread-safe!
-        executionLog.add(message);
+        // Enter critical section for execution log //Commit 3
+        logLock.lock();
+        try {
+            executionLog.add(message);
+        } finally {
+            // Always release the lock to avoid deadlock
+            logLock.unlock();
+        }
+
     }
 }
 
