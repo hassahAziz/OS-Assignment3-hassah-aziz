@@ -1,4 +1,5 @@
 import java.util.concurrent.locks.ReentrantLock;//Commit 1
+import java.util.concurrent.Semaphore;//Commit 4
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Map;
@@ -47,6 +48,9 @@ class SharedResources {
 
     // TODO #2: Add a Semaphore to limit concurrent process execution
     // Example: public static final Semaphore cpuSemaphore = new Semaphore(1);
+
+    // Binary semaphore used to allow only one process to access the CPU at a time
+    public static final Semaphore cpuSemaphore = new Semaphore(1);// Commit 4
 
     // Method to increment context switch counter
     public static void incrementContextSwitch() {
@@ -129,9 +133,14 @@ class Process implements Runnable {
     @Override
     public void run() {
         // TODO #3: Acquire CPU semaphore before executing
+        // Tracks whether this process acquired the CPU permit
+        boolean permitAcquired = false; // Commit 4
         // This ensures only allowed number of processes run simultaneously
 
         try {
+            // Acquire CPU permit before process execution
+            SharedResources.cpuSemaphore.acquireUninterruptibly(); // Commit 4
+            permitAcquired = true;
             if (startTime == -1) {
                 startTime = System.currentTimeMillis();
             }
@@ -193,6 +202,10 @@ class Process implements Runnable {
         } finally {
             // TODO #4: Release CPU semaphore here
             // Always release in finally block to prevent deadlocks!
+            // Release CPU permit after execution
+            if (permitAcquired) { // Commit 4
+                SharedResources.cpuSemaphore.release();
+            }
         }
     }
 
@@ -212,7 +225,12 @@ class Process implements Runnable {
 
     public void runToCompletion() {
         // TODO: Similar synchronization needed here
+        // Tracks whether this last process acquired the CPU permit //Commit 4
+        boolean permitAcquired = false;
         try {
+            // Acquire CPU permit before running the last process //Commit 4
+            SharedResources.cpuSemaphore.acquire();
+            permitAcquired = true;
             System.out.println(Colors.BRIGHT_CYAN + "  ⚡ " + Colors.BOLD + Colors.CYAN + name +
                     Colors.RESET + Colors.BRIGHT_CYAN + " is the last process, running to completion" +
                     Colors.RESET + " [" + remainingTime + "ms]");
@@ -229,6 +247,13 @@ class Process implements Runnable {
             System.out.println();
         } catch (InterruptedException e) {
             System.out.println(Colors.RED + "  ✗ " + name + " was interrupted." + Colors.RESET);
+        }
+        // Commit 4
+        finally {
+            // Release CPU permit after the last process finishes
+            if (permitAcquired) {
+                SharedResources.cpuSemaphore.release();
+            }
         }
     }
 
