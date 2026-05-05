@@ -1,3 +1,4 @@
+import java.util.concurrent.locks.ReentrantLock;//Commit 1
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Map;
@@ -39,6 +40,9 @@ class SharedResources {
     // TODO #1: Add a ReentrantLock(s) here to protect critical sections
     // Example: public static final ReentrantLock lock = new ReentrantLock();
 
+    // Lock used to protect shared counter variables
+    public static final ReentrantLock counterLock = new ReentrantLock();// Commit 1
+
     // TODO #2: Add a Semaphore to limit concurrent process execution
     // Example: public static final Semaphore cpuSemaphore = new Semaphore(1);
 
@@ -46,19 +50,41 @@ class SharedResources {
     public static void incrementContextSwitch() {
         // TODO: Protect this critical section with a lock
         // RACE CONDITION: Multiple threads might read and write simultaneously!
-        contextSwitchCount++;
+        // Enter critical section for context switch counter
+        counterLock.lock();// Commit 1
+        try {
+            contextSwitchCount++;
+        } finally {
+            // Always release the lock to avoid deadlock
+            counterLock.unlock();
+        }
+
     }
 
     // Method to increment completed process counter
     public static void incrementCompletedProcess() {
         // TODO: Protect this critical section with a lock
-        completedProcessCount++;
+        // Enter critical section for completed process counter
+        counterLock.lock();// Commit 1
+        try {
+            completedProcessCount++;
+        } finally {
+            // Always release the lock to avoid deadlock
+            counterLock.unlock();
+        }
     }
 
     // Method to add waiting time
     public static void addWaitingTime(long time) {
         // TODO: Protect this critical section with a lock
-        totalWaitingTime += time;
+        // Enter critical section for total waiting time
+        counterLock.lock();// Commit 1
+        try {
+            totalWaitingTime += time;
+        } finally {
+            // Always release the lock to avoid deadlock
+            counterLock.unlock();
+        }
     }
 
     // Method to log execution
