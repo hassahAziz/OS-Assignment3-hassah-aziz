@@ -44,7 +44,7 @@ class SharedResources {
     public static final ReentrantLock logLock = new ReentrantLock();// Commit 3
 
     // Lock used to protect shared counter variables
-    public static final ReentrantLock counterLock = new ReentrantLock();// Commit 1
+    public static final ReentrantLock counterLock = new ReentrantLock();// Commit 2
 
     // TODO #2: Add a Semaphore to limit concurrent process execution
     // Example: public static final Semaphore cpuSemaphore = new Semaphore(1);
@@ -57,7 +57,7 @@ class SharedResources {
         // TODO: Protect this critical section with a lock
         // RACE CONDITION: Multiple threads might read and write simultaneously!
         // Enter critical section for context switch counter
-        counterLock.lock();// Commit 1
+        counterLock.lock();// Commit 2
         try {
             contextSwitchCount++;
         } finally {
@@ -71,7 +71,7 @@ class SharedResources {
     public static void incrementCompletedProcess() {
         // TODO: Protect this critical section with a lock
         // Enter critical section for completed process counter
-        counterLock.lock();// Commit 1
+        counterLock.lock();// Commit 2
         try {
             completedProcessCount++;
         } finally {
@@ -84,7 +84,7 @@ class SharedResources {
     public static void addWaitingTime(long time) {
         // TODO: Protect this critical section with a lock
         // Enter critical section for total waiting time
-        counterLock.lock();// Commit 1
+        counterLock.lock();// Commit 2
         try {
             totalWaitingTime += time;
         } finally {
@@ -287,7 +287,7 @@ class Process implements Runnable {
 
 public class SchedulerSimulationSync {
     public static void main(String[] args) {
-        // ⚠️ IMPORTANT: Put your student ID here
+        // ⚠️ IMPORTANT: Put your student ID here//Commit 1
         int studentID = 445052136; // ← CHANGE THIS TO YOUR ACTUAL STUDENT ID
 
         Random random = new Random(studentID);
